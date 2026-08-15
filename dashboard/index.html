@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Franklin County Lead Ledger</title>
+<style>
+  :root{
+    --ink:#161a20;
+    --ink-2:#1e232b;
+    --paper:#e9e4d6;
+    --paper-dim:#a9a394;
+    --brass:#b8925a;
+    --brass-bright:#d6ac72;
+    --red:#a5433a;
+    --green:#5c7a5e;
+    --line: rgba(233,228,214,0.12);
+    --mono: "IBM Plex Mono", "Courier New", monospace;
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--mono);
+    font-size:14px;
+    line-height:1.5;
+  }
+
+  /* ---------- header / masthead ---------- */
+  header.masthead{
+    border-bottom:2px solid var(--brass);
+    padding:28px 32px 20px;
+    background:
+      radial-gradient(1200px 300px at 10% -50%, rgba(184,146,90,0.10), transparent),
+      var(--ink-2);
+  }
+  .masthead-top{
+    display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  }
+  .masthead-title{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:30px;
+    letter-spacing:0.01em;
+    color:var(--paper);
+  }
+  .masthead-title small{
+    display:block;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--brass-bright);
+    margin-bottom:6px;
+  }
+  .masthead-meta{
+    font-size:12px;
+    color:var(--paper-dim);
+    text-align:right;
+  }
+  .masthead-meta span{color:var(--brass-bright);}
+
+  .stat-strip{
+    display:flex; gap:0; margin-top:22px; border:1px solid var(--line); border-radius:2px; overflow:hidden;
+  }
+  .stat{
+    flex:1; padding:12px 18px; border-right:1px solid var(--line);
+  }
+  .stat:last-child{border-right:none;}
+  .stat .num{font-family:var(--serif); font-size:24px; font-weight:700; color:var(--brass-bright);}
+  .stat .lbl{font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--paper-dim); margin-top:2px;}
+
+  /* ---------- controls ---------- */
+  .controls{
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+    padding:16px 32px; border-bottom:1px solid var(--line); background:var(--ink);
+    position:sticky; top:0; z-index:5;
+  }
+  .controls input[type="search"], .controls select{
+    background:var(--ink-2); color:var(--paper); border:1px solid var(--line);
+    border-radius:2px; padding:8px 10px; font-family:var(--mono); font-size:12.5px;
+  }
+  .controls input[type="search"]{min-width:220px;}
+  .controls label{font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--paper-dim); margin-right:4px;}
+  .score-range{display:flex; align-items:center; gap:8px;}
+  .score-range input[type="range"]{accent-color:var(--brass);}
+  .btn{
+    margin-left:auto;
+    background:var(--brass); color:var(--ink); border:none; border-radius:2px;
+    padding:9px 16px; font-family:var(--mono); font-size:12px; font-weight:700;
+    letter-spacing:0.05em; text-transform:uppercase; cursor:pointer;
+  }
+  .btn:hover{background:var(--brass-bright);}
+  .btn:disabled{opacity:0.4; cursor:not-allowed;}
+
+  /* ---------- table ---------- */
+  main{padding:0 32px 60px;}
+  table{width:100%; border-collapse:collapse; margin-top:18px;}
+  thead th{
+    position:sticky; top:57px; background:var(--ink);
+    text-align:left; font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--paper-dim); padding:10px 10px; border-bottom:1px solid var(--brass); cursor:pointer; white-space:nowrap;
+  }
+  thead th:hover{color:var(--brass-bright);}
+  tbody tr{border-bottom:1px solid var(--line);}
+  tbody tr:hover{background:rgba(184,146,90,0.06);}
+  td{padding:11px 10px; vertical-align:top; font-size:12.5px;}
+  td.owner{font-family:var(--serif); font-size:14px; color:var(--paper);}
+  td.addr{color:var(--paper-dim); max-width:220px;}
+  td.doc{color:var(--brass-bright); font-size:11.5px;}
+  a.doclink{color:var(--brass-bright); text-decoration:none; border-bottom:1px dotted var(--brass);}
+  a.doclink:hover{color:var(--paper);}
+
+  .score{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:50%;
+    font-family:var(--serif); font-weight:700; font-size:13px;
+    border:1.5px solid var(--brass);
+  }
+  .score.hot{border-color:var(--red); color:var(--red);}
+  .score.warm{border-color:var(--brass); color:var(--brass-bright);}
+  .score.cool{border-color:var(--paper-dim); color:var(--paper-dim);}
+
+  .flags{display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;}
+  .flag{
+    font-size:10px; letter-spacing:0.03em; padding:2px 6px; border-radius:2px;
+    background:rgba(165,67,58,0.15); color:#d98d84; border:1px solid rgba(165,67,58,0.35);
+    white-space:nowrap;
+  }
+
+  .empty-state{
+    text-align:center; padding:80px 20px; color:var(--paper-dim);
+  }
+  .empty-state .stamp{
+    display:inline-block; border:2px solid var(--brass); color:var(--brass);
+    padding:10px 20px; transform:rotate(-3deg); font-family:var(--serif);
+    font-size:18px; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:14px;
+  }
+
+  footer{
+    padding:18px 32px; color:var(--paper-dim); font-size:11px; border-top:1px solid var(--line);
+  }
+
+  @media (max-width:720px){
+    .masthead-top{flex-direction:column;}
+    .masthead-meta{text-align:left;}
+    thead th:nth-child(n+6), td:nth-child(n+6){display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-top">
+    <div class="masthead-title">
+      <small>Franklin County, Ohio &middot; Public Records</small>
+      Motivated Seller Lead Ledger
+    </div>
+    <div class="masthead-meta">
+      Last pulled: <span id="fetchedAt">—</span><br>
+      Window: <span id="dateRange">—</span>
+    </div>
+  </div>
+  <div class="stat-strip">
+    <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">Total Leads</div></div>
+    <div class="stat"><div class="num" id="statAddr">0</div><div class="lbl">With Address</div></div>
+    <div class="stat"><div class="num" id="statHot">0</div><div class="lbl">Score 70+</div></div>
+    <div class="stat"><div class="num" id="statTypes">0</div><div class="lbl">Lead Types</div></div>
+  </div>
+</header>
+
+<div class="controls">
+  <label for="q">Search</label>
+  <input id="q" type="search" placeholder="owner, address, doc #...">
+
+  <label for="catFilter">Type</label>
+  <select id="catFilter"><option value="">All</option></select>
+
+  <div class="score-range">
+    <label for="minScore">Min score</label>
+    <input id="minScore" type="range" min="0" max="100" value="0">
+    <span id="minScoreVal">0</span>
+  </div>
+
+  <button class="btn" id="exportBtn">Export CSV</button>
+</div>
+
+<main>
+  <table id="leadTable">
+    <thead>
+      <tr>
+        <th data-key="score">Score</th>
+        <th data-key="owner">Owner / Grantor</th>
+        <th data-key="cat_label">Type</th>
+        <th data-key="filed">Filed</th>
+        <th data-key="amount">Amount</th>
+        <th data-key="prop_address">Property Address</th>
+        <th data-key="mail_address">Mailing Address</th>
+        <th data-key="doc_num">Doc #</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <div class="stamp">No leads on file</div>
+    <div>Run the scraper (<code>python scraper/fetch.py</code>) or wait for the next scheduled pull.</div>
+  </div>
+</main>
+
+<footer>
+  Source: Franklin County, Ohio Clerk of Courts / Recorder public search &mdash; for lead-generation research purposes.
+  Verify every record against the official record before acting on it.
+</footer>
+
+<script>
+let ALL_RECORDS = [];
+let SORT_KEY = "score";
+let SORT_DIR = -1;
+
+function fmtMoney(v){
+  if (v === null || v === undefined || v === "") return "—";
+  const n = Number(v);
+  if (Number.isNaN(n)) return "—";
+  return "$" + n.toLocaleString(undefined, {maximumFractionDigits:0});
+}
+
+function scoreClass(s){
+  if (s >= 70) return "hot";
+  if (s >= 45) return "warm";
+  return "cool";
+}
+
+function render(){
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const cat = document.getElementById("catFilter").value;
+  const minScore = Number(document.getElementById("minScore").value);
+
+  let rows = ALL_RECORDS.filter(r => {
+    if (r.score < minScore) return false;
+    if (cat && r.cat !== cat) return false;
+    if (q){
+      const hay = [r.owner, r.grantee, r.prop_address, r.mail_address, r.doc_num, r.legal]
+        .filter(Boolean).join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  rows.sort((a,b) => {
+    let av = a[SORT_KEY], bv = b[SORT_KEY];
+    if (av === null || av === undefined) av = "";
+    if (bv === null || bv === undefined) bv = "";
+    if (typeof av === "string") av = av.toLowerCase();
+    if (typeof bv === "string") bv = bv.toLowerCase();
+    if (av < bv) return -1 * SORT_DIR;
+    if (av > bv) return 1 * SORT_DIR;
+    return 0;
+  });
+
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+  document.getElementById("emptyState").style.display = rows.length ? "none" : "block";
+  document.getElementById("leadTable").style.display = rows.length ? "table" : "none";
+
+  for (const r of rows){
+    const tr = document.createElement("tr");
+
+    const flagsHtml = (r.flags||[]).map(f => `<span class="flag">${f}</span>`).join("");
+    const propAddr = [r.prop_address, r.prop_city, r.prop_zip].filter(Boolean).join(", ") || "—";
+    const mailAddr = [r.mail_address, r.mail_city, r.mail_state, r.mail_zip].filter(Boolean).join(", ") || "—";
+    const link = r.clerk_url ? `<a class="doclink" href="${r.clerk_url}" target="_blank" rel="noopener">${r.doc_num||""}</a>` : (r.doc_num||"—");
+
+    tr.innerHTML = `
+      <td><span class="score ${scoreClass(r.score)}">${r.score}</span></td>
+      <td class="owner">${r.owner || "—"}${flagsHtml ? `<div class="flags">${flagsHtml}</div>` : ""}</td>
+      <td>${r.cat_label || r.cat || "—"}</td>
+      <td>${r.filed || "—"}</td>
+      <td>${fmtMoney(r.amount)}</td>
+      <td class="addr">${propAddr}</td>
+      <td class="addr">${mailAddr}</td>
+      <td class="doc">${link}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function populateCategoryFilter(){
+  const sel = document.getElementById("catFilter");
+  const cats = [...new Set(ALL_RECORDS.map(r => r.cat))].filter(Boolean).sort();
+  for (const c of cats){
+    const label = (ALL_RECORDS.find(r => r.cat === c) || {}).cat_label || c;
+    const opt = document.createElement("option");
+    opt.value = c; opt.textContent = label;
+    sel.appendChild(opt);
+  }
+  document.getElementById("statTypes").textContent = cats.length;
+}
+
+function toCsv(rows){
+  const cols = ["First Name","Last Name","Mailing Address","Mailing City","Mailing State","Mailing Zip",
+    "Property Address","Property City","Property State","Property Zip","Lead Type","Document Type",
+    "Date Filed","Document Number","Amount/Debt Owed","Seller Score","Motivated Seller Flags","Source","Public Records URL"];
+  const esc = v => `"${String(v ?? "").replace(/"/g,'""')}"`;
+  const lines = [cols.map(esc).join(",")];
+  for (const r of rows){
+    let first = "", last = r.owner || "";
+    if (r.owner && r.owner.includes(",")){
+      const [l, f] = r.owner.split(",");
+      last = l.trim(); first = (f||"").trim().split(" ")[0] || "";
+    } else if (r.owner && !/LLC|INC|CORP|TRUST|LTD/i.test(r.owner)) {
+      const parts = r.owner.split(" ");
+      if (parts.length > 1){ first = parts[0]; last = parts.slice(1).join(" "); }
+    }
+    lines.push([first,last,r.mail_address,r.mail_city,r.mail_state,r.mail_zip,
+      r.prop_address,r.prop_city,r.prop_state,r.prop_zip,r.cat_label,r.doc_type,
+      r.filed,r.doc_num,r.amount,r.score,(r.flags||[]).join("; "),
+      "Franklin County, OH Clerk of Courts / Recorder", r.clerk_url].map(esc).join(","));
+  }
+  return lines.join("\n");
+}
+
+async function init(){
+  try{
+    const res = await fetch("records.json", {cache:"no-store"});
+    const data = await res.json();
+    ALL_RECORDS = data.records || [];
+    document.getElementById("fetchedAt").textContent = data.fetched_at || "never yet";
+    document.getElementById("dateRange").textContent = data.date_range
+      ? `${data.date_range.from || "?"} → ${data.date_range.to || "?"} (${data.date_range.lookback_days ?? "?"}d)`
+      : "—";
+    document.getElementById("statTotal").textContent = data.total ?? ALL_RECORDS.length;
+    document.getElementById("statAddr").textContent = data.with_address ?? 0;
+    document.getElementById("statHot").textContent = ALL_RECORDS.filter(r => r.score >= 70).length;
+    populateCategoryFilter();
+  } catch(e){
+    console.error("Failed to load records.json", e);
+  }
+  render();
+}
+
+document.getElementById("q").addEventListener("input", render);
+document.getElementById("catFilter").addEventListener("change", render);
+document.getElementById("minScore").addEventListener("input", (e) => {
+  document.getElementById("minScoreVal").textContent = e.target.value;
+  render();
+});
+document.querySelectorAll("thead th").forEach(th => {
+  th.addEventListener("click", () => {
+    const key = th.dataset.key;
+    if (SORT_KEY === key) SORT_DIR *= -1; else { SORT_KEY = key; SORT_DIR = -1; }
+    render();
+  });
+});
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const cat = document.getElementById("catFilter").value;
+  const minScore = Number(document.getElementById("minScore").value);
+  const rows = ALL_RECORDS.filter(r => {
+    if (r.score < minScore) return false;
+    if (cat && r.cat !== cat) return false;
+    if (q){
+      const hay = [r.owner, r.grantee, r.prop_address, r.mail_address, r.doc_num].filter(Boolean).join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  const blob = new Blob([toCsv(rows)], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "franklin_county_leads.csv";
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+});
+
+init();
+</script>
+</body>
+</html>

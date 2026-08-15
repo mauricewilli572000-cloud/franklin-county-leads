@@ -1,0 +1,6 @@
+scraper/debug/
+scraper/_tmp_parcels.dbf
+__pycache__/
+*.pyc
+.venv/
+venv/

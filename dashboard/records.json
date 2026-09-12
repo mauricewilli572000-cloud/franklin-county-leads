@@ -1,9 +1,9 @@
 {
-  "fetched_at": "2026-09-11T07:12:22+00:00",
+  "fetched_at": "2026-09-12T07:13:09+00:00",
   "source": "Franklin County, Ohio Clerk of Courts / Recorder (franklin.oh.publicsearch.us)",
   "date_range": {
-    "from": "2026-09-04",
-    "to": "2026-09-11",
+    "from": "2026-09-05",
+    "to": "2026-09-12",
     "lookback_days": 7
   },
   "total": 0,

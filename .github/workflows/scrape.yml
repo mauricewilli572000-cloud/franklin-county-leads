@@ -38,8 +38,10 @@ jobs:
         run: pip install requests beautifulsoup4 lxml dbfread playwright
 
       - name: Install Playwright browsers
-        run: python -m playwright install --with-deps chromium
-
+        run: |
+          # Retry: Ubuntu's package mirrors sometimes fail for a few minutes (seen 2026-11-11).
+          for i in 1 2 3; do python -m playwright install --with-deps chromium && exit 0; echo "install failed (try $i), retrying in 60s"; sleep 60; done
+          python -m playwright install chromium   # last resort: browser only (the runner already has most system libraries)
       - name: Run scraper
         env:
           LOOKBACK_DAYS: "7"
